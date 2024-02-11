@@ -1,5 +1,5 @@
 # Use latest MySQL image
-FROM mysql:latest
+FROM mysql
 # Set working directory
 WORKDIR /tmp
 # Copy all files to the working directory

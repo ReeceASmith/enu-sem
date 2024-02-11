@@ -1,0 +1,11 @@
+version: '3'
+services:
+  # Application Dockerfile is in the same folder /
+  app:
+    build: .
+
+  # db Dockerfile is in the db folder db/
+  db:
+    build: db/.
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
