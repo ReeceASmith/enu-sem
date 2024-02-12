@@ -154,12 +154,25 @@ public class App
 
 
     public void displayEmployeeSalaries() {
+        this.displayEmployeeSalaries("");
+    }
+
+    public void displayEmployeeSalaries(String dept_no) {
         try {
             // Create SQL statement
             Statement stmt = con.createStatement();
-            String strSelect = "SELECT employees.emp_no, first_name, last_name, salary FROM employees, salaries WHERE employees.emp_no=salaries.emp_no AND salaries.to_date = '9999-01-01'";
+
+            // Check if we are displaying salaries from a specific department
+            String strSelect;
+            if (dept_no.isBlank()) {
+                strSelect = "SELECT employees.emp_no, first_name, last_name, salary FROM employees, salaries WHERE employees.emp_no=salaries.emp_no AND salaries.to_date = '9999-01-01'";
+            } else {
+                strSelect = "SELECT employees.emp_no, first_name, last_name, salary FROM employees, dept_emp, salaries WHERE employees.emp_no = salaries.emp_no AND employees.emp_no = dept_emp.emp_no AND dept_emp.dept_no = '" + dept_no + "' AND salaries.to_date = '9999-01-01'";
+            }
+
             // Execute
             ResultSet emp_rset = stmt.executeQuery(strSelect);
+            
             // Return if no data
             if (!emp_rset.next()) {
                 System.out.println("Error displaying all employee salaries");
@@ -168,9 +181,11 @@ public class App
 
             // For every employee, display their ID, name and salary
             System.out.println("ID\t\tName\t\t\t Salary");
+
             do {
                 System.out.printf("%-8.7s%1.1s. %-12.11s £%d%n", emp_rset.getString("emp_no"), emp_rset.getString("first_name"), emp_rset.getString("last_name"), emp_rset.getInt("salary"));
             } while (emp_rset.next());
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get employee details");
@@ -187,8 +202,9 @@ public class App
         // Connect to database
         a.connect();
 
-        // Display all employee salaries
-        a.displayEmployeeSalaries();
+        // Display all employee salaries by department
+        a.displayEmployeeSalaries("D009");
+        //a.displayEmployee(a.getEmployee(499991));
 
 
         // Disconnect from database
