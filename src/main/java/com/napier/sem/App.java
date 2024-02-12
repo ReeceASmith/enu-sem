@@ -21,18 +21,18 @@ public class App
             System.exit(-1);
         }
 
-        int retries = 10;
+        int retries = 15;
         for (int i=0; i<retries; ++i) {
             System.out.println("Connecting to database...");
             try {
                 // Wait for db to start
-                Thread.sleep(20000);
+                Thread.sleep(5000);
                 // Connect to database
                 con = DriverManager.getConnection("jdbc:mysql://db:3306/employees?useSSL=false", "root", "password");
                 System.out.println("Successfully connected");
                 break;
             } catch (SQLException sqle) {
-                System.out.println("Failed to connect to database, attempt " + i);
+                System.out.println("Failed to connect to database, attempt " + i + "/" + retries);
                 System.out.println(sqle.getMessage());
             } catch (InterruptedException ie) {
                 System.out.println("Thread interrupted? Should not happen.");
@@ -69,14 +69,14 @@ public class App
             if (!emp_rset.next())
                 { return null; }
 
-            // Continue - add employee details
+            // Continue - add employee details: employee number, first & last name
             Employee emp = new Employee();
             emp.emp_no = emp_rset.getInt("emp_no");
             emp.first_name = emp_rset.getString("first_name");
             emp.last_name = emp_rset.getString("last_name");
 
             // Repeat for department, manager and salary details
-            // Ensure dates are correct
+            // Job Title
             strSelect = "SELECT title FROM titles WHERE emp_no = " + ID + " AND to_date = '9999-01-01'";
             ResultSet title_rset = stmt.executeQuery(strSelect);
             if (!title_rset.next())
@@ -84,7 +84,7 @@ public class App
 
             emp.title = title_rset.getString("title");
 
-
+            // Salary
             strSelect = "SELECT salary FROM salaries WHERE emp_no = " + ID + " AND to_date = '9999-01-01'";
             ResultSet salary_rset = stmt.executeQuery(strSelect);
             if (!salary_rset.next())
@@ -93,7 +93,41 @@ public class App
             emp.salary = salary_rset.getInt("salary");
 
 
-            // Will fetch employee department(s?) and manager(s?)...
+            // Department
+            // Use SQL subqueries to select through multiple tables - fetches department number and name
+            strSelect = "SELECT * FROM (" +
+                    "SELECT emp_no, dept_no FROM dept_emp WHERE emp_no = " + ID + " AND to_date = '9999-01-01'" +
+                    ") as de, departments " +
+                    "WHERE de.dept_no=departments.dept_no";
+            ResultSet dept_rset = stmt.executeQuery(strSelect);
+            if (!dept_rset.next())
+                { return null; }
+
+            // Temporary department number to track department manager
+            String temp_dept_no = dept_rset.getString("dept_no");
+            emp.dept_name = dept_rset.getString("dept_name");
+
+
+            // Manager
+            // More SQL subqueries - select employee number of department manager - select name of employee with that employee number
+            strSelect = "SELECT employees.emp_no, employees.first_name, employees.last_name FROM (" +
+                    "SELECT emp_no FROM dept_manager WHERE to_date = '9999-01-01' AND dept_no = '" + temp_dept_no + "'" +
+                    ") as mgr, employees " +
+                    "WHERE mgr.emp_no=employees.emp_no";
+            ResultSet mgr_rset = stmt.executeQuery(strSelect);
+            if (!mgr_rset.next())
+                { return null; }
+
+            emp.manager = mgr_rset.getString("first_name") + " " + mgr_rset.getString("last_name");
+
+
+            // Close all result sets
+            emp_rset.close();
+            title_rset.close();
+            salary_rset.close();
+            dept_rset.close();
+            mgr_rset.close();
+
             return emp;
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -108,55 +142,38 @@ public class App
         if (emp == null) { return; }
         System.out.println(
                 "Employee:\n\tID: " + emp.emp_no
-                + "\n\tName: " + emp.first_name + " " + emp.last_name
-                + "\n\tJob Title: " + emp.title
-                + "\n\tSalary: £" + emp.salary
-                + "\n\tDepartment: " + emp.dept_name
-                + "\n\tManager: " + emp.manager
-                + "\n"
+                        + "\n\tName: " + emp.first_name + " " + emp.last_name
+                        + "\n\tJob Title: " + emp.title
+                        + "\n\tSalary: £" + emp.salary
+                        + "\n\tDepartment: " + emp.dept_name
+                        + "\n\tManager: " + emp.manager
+                        + "\n"
         );
     }
 
 
 
-    public Employee[] getAllEmployees() {
+    public void displayEmployeeSalaries() {
         try {
-            // Get employee details
-            // Create an SQL statement
+            // Create SQL statement
             Statement stmt = con.createStatement();
-            // Create string for SQL statement
-            String strSelect =
-                    "SELECT * FROM employees";
-            // Execute SQL statement
-            ResultSet rset = stmt.executeQuery(strSelect);
-            // Return new employee if valid
-            // Check one is returned
-            Employee[] employees = new Employee[100];
-            int i = 0;
-            while (rset.next()) {
-                Employee emp = new Employee();
-                emp.emp_no = rset.getInt("emp_no");
-                emp.first_name = rset.getString("first_name");
-                emp.last_name = rset.getString("last_name");
-                employees[i] = emp;
-                i++;
+            String strSelect = "SELECT employees.emp_no, first_name, last_name, salary FROM employees, salaries WHERE employees.emp_no=salaries.emp_no AND salaries.to_date = '9999-01-01'";
+            // Execute
+            ResultSet emp_rset = stmt.executeQuery(strSelect);
+            // Return if no data
+            if (!emp_rset.next()) {
+                System.out.println("Error displaying all employee salaries");
+                return;
             }
-            return employees;
+
+            // For every employee, display their ID, name and salary
+            System.out.println("ID\t\tName\t\t\t Salary");
+            do {
+                System.out.printf("%-8.7s%1.1s. %-12.11s £%d%n", emp_rset.getString("emp_no"), emp_rset.getString("first_name"), emp_rset.getString("last_name"), emp_rset.getInt("salary"));
+            } while (emp_rset.next());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get employee details");
-            return null;
-        }
-    }
-
-
-
-    public void displayEmployeeSalaries(Employee[] employees) {
-        if (employees == null) { return; }
-
-        System.out.println("ID\t\tName\tSalary\t");
-        for (Employee emp: employees) {
-            System.out.printf("%-8s%-1s. %-14s%-8d\n", emp.emp_no, emp.first_name, emp.last_name, emp.salary);
         }
     }
 
@@ -170,10 +187,8 @@ public class App
         // Connect to database
         a.connect();
 
-        // Get employee
-        Employee emp = a.getEmployee(255530);
-        // Display results
-        a.displayEmployee(emp);
+        // Display all employee salaries
+        a.displayEmployeeSalaries();
 
 
         // Disconnect from database
