@@ -1,7 +1,5 @@
 # Software Engineering Methods Laboratory Repository
 
-This is some test text
-
 
 [![LICENSE](https://img.shields.io/github/license/ReeceASmith/enu-sem.svg?style=flat-square)](https://github.com/ReeceASmith/enu-sem/blob/master/LICENSE)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/ReeceASmith/enu-sem/main.yml?branch=master)

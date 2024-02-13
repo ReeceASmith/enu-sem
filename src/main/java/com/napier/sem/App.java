@@ -153,25 +153,54 @@ public class App
 
 
 
-    public void displayEmployeeSalaries() {
-        this.displayEmployeeSalaries("");
+    public void displayEmployeeSalariesByDept(String dept_no) {
+        String strSelect = "";
+        if (!dept_no.isBlank()) {
+            strSelect = "SELECT employees.emp_no, first_name, last_name, salary " +
+                    "FROM employees, dept_emp, salaries " +
+                    "WHERE employees.emp_no = salaries.emp_no " +
+                    "AND employees.emp_no = dept_emp.emp_no " +
+                    "AND dept_emp.dept_no = '" + dept_no + "' " +
+                    "AND salaries.to_date = '9999-01-01'";
+        }
+        displayEmployeeSalaries(strSelect);
     }
 
-    public void displayEmployeeSalaries(String dept_no) {
+    public void displayEmployeeSalariesByRole(String role) {
+        String strSelect = "";
+        if (!role.isBlank()) {
+            strSelect = "SELECT employee.emp_no, first_name, last_name, salary " +
+                    "FROM employees, salaries, titles " +
+                    "WHERE employees.emp_no=salaries.emp_no " +
+                    "AND employees.emp_no=titles.emp_no " +
+                    "AND salaries.to_date = '9999-01-01' " +
+                    "AND titles.title = '" + role + "' " +
+                    "AND titles.to_date = '9999-01-01' ";
+        }
+        displayEmployeeSalaries(strSelect);
+    }
+
+    public void displayEmployeeSalaries() {
+        displayEmployeeSalaries("SELECT employees.emp_no, first_name, last_name, salary " +
+                "FROM employees, salaries " +
+                "WHERE employees.emp_no=salaries.emp_no " +
+                "AND salaries.to_date = '9999-01-01'");
+    }
+
+    private void displayEmployeeSalaries(String query) {
+        // Escapes if wrong inputs
+        if (query == null) { return; }
+        if (query.isBlank()) {
+            displayEmployeeSalaries();
+            return;
+        }
+
         try {
             // Create SQL statement
             Statement stmt = con.createStatement();
 
-            // Check if we are displaying salaries from a specific department
-            String strSelect;
-            if (dept_no.isBlank()) {
-                strSelect = "SELECT employees.emp_no, first_name, last_name, salary FROM employees, salaries WHERE employees.emp_no=salaries.emp_no AND salaries.to_date = '9999-01-01'";
-            } else {
-                strSelect = "SELECT employees.emp_no, first_name, last_name, salary FROM employees, dept_emp, salaries WHERE employees.emp_no = salaries.emp_no AND employees.emp_no = dept_emp.emp_no AND dept_emp.dept_no = '" + dept_no + "' AND salaries.to_date = '9999-01-01'";
-            }
-
             // Execute
-            ResultSet emp_rset = stmt.executeQuery(strSelect);
+            ResultSet emp_rset = stmt.executeQuery(query);
             
             // Return if no data
             if (!emp_rset.next()) {
