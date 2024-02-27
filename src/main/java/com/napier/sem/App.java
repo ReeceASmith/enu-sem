@@ -166,17 +166,52 @@ public class App
         displayEmployeeSalaries(strSelect);
     }
 
-    public void displayEmployeeSalariesByRole(String role) {
-        String strSelect = "";
-        if (!role.isBlank()) {
-            strSelect = "SELECT employee.emp_no, first_name, last_name, salary " +
-                    "FROM employees, salaries, titles " +
-                    "WHERE employees.emp_no=salaries.emp_no " +
-                    "AND employees.emp_no=titles.emp_no " +
-                    "AND salaries.to_date = '9999-01-01' " +
-                    "AND titles.title = '" + role + "' " +
-                    "AND titles.to_date = '9999-01-01' ";
+
+    public void displayEmployeeSalariesByDept(Employee dept_manager) {
+        if (dept_manager == null || dept_manager.dept_name == null) {
+            System.out.println("Error displaying employee salaries: Department manager does not exist or has no department");
+            return;
         }
+        if (dept_manager.dept_name.isBlank()) {
+            System.out.println("Error displaying employee salaries: Department manager has no department");
+            return;
+        }
+
+        try {
+            // Get department ID
+            Statement stmt = con.createStatement();
+
+            ResultSet dept_rset = stmt.executeQuery("SELECT dept_no " +
+                    "FROM departments " +
+                    "WHERE dept_name='" + dept_manager.dept_name + "'");
+
+            if (!dept_rset.next()) {
+                throw new RuntimeException("Department name returned no result from database");
+            }
+
+            String temp_dept_no = dept_rset.getString("dept_no");
+            System.out.println("DeptNo: " + temp_dept_no);
+            displayEmployeeSalariesByDept(temp_dept_no);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get department ID");
+        }
+    }
+
+
+    public void displayEmployeeSalariesByRole(String role) {
+        if (role.isBlank()) {
+            System.out.println("Error displaying employee salaries: No role provided");
+            return;
+        }
+        String strSelect = "SELECT employees.emp_no, first_name, last_name, salary " +
+                "FROM employees, salaries, titles " +
+                "WHERE employees.emp_no=salaries.emp_no " +
+                "AND employees.emp_no=titles.emp_no " +
+                "AND salaries.to_date = '9999-01-01' " +
+                "AND titles.title = '" + role + "' " +
+                "AND titles.to_date = '9999-01-01' ";
+
         displayEmployeeSalaries(strSelect);
     }
 
@@ -187,11 +222,13 @@ public class App
                 "AND salaries.to_date = '9999-01-01'");
     }
 
+
+
     private void displayEmployeeSalaries(String query) {
         // Escapes if wrong inputs
         if (query == null) { return; }
         if (query.isBlank()) {
-            displayEmployeeSalaries();
+            System.out.println("displayEmployeeSalaries(String query): query is blank");
             return;
         }
 
@@ -204,7 +241,7 @@ public class App
             
             // Return if no data
             if (!emp_rset.next()) {
-                System.out.println("Error displaying all employee salaries");
+                System.out.println("displayEmployeeSalaries(String query): ResultSet returned no results");
                 return;
             }
 
@@ -217,7 +254,7 @@ public class App
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println("Failed to get employee details");
+            System.out.println("displayEmployeeDetails(String query): Failed to get employee details");
         }
     }
 
@@ -232,8 +269,13 @@ public class App
         a.connect();
 
         // Display all employee salaries by department
-        a.displayEmployeeSalaries("D009");
-        //a.displayEmployee(a.getEmployee(499991));
+        //a.displayEmployeeSalariesByRole("Manager");
+        a.displayEmployeeSalariesByDept(a.getEmployee(111939));
+        //a.displayEmployeeSalaries("SELECT employees.emp_no, first_name, last_name, salary " +
+                //"FROM employees, dept_manager, salaries " +
+                //"WHERE employees.emp_no = salaries.emp_no AND " +
+                //"employees.emp_no = dept_manager.emp_no AND " +
+                //"dept_manager.to_date='9999-01-01'");
 
 
         // Disconnect from database
