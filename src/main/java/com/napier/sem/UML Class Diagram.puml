@@ -1,20 +1,13 @@
 @startuml
 'https://plantuml.com/class-diagram
 class Employee {
-    -id: int
-    -name: String
+    -emp_no: int
+    -first_name: String
+    -last_name: String
+    -title: String
+    -salary: int
     -department: Department
-    -salary: double
-    +Employee(int id, String name, String department, double salary)
-    +int getId()
-    +String getName()
-    +String getDepartment()
-    +double getSalary()
-    +void setId(int id)
-    +void setName(String name)
-    +void setDepartment(String department)
-    +void setSalary(double salary)
-    +String toString()
+    -manager: Employee
 }
 class App {
     -con: Connection
@@ -48,6 +41,8 @@ class Department {
     +void setManager(Employee manager)
 }
 
-App --> Employee
+App --.> Employee
+Employee " 1 " <--* " 1 " Department
+Employee " 1 " *--> " 1 " Department
 
 @enduml
