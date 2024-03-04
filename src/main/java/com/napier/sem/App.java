@@ -105,7 +105,7 @@ public class App
 
             // Temporary department number to track department manager
             String temp_dept_no = dept_rset.getString("dept_no");
-            emp.dept_name = dept_rset.getString("dept_name");
+            emp.department = getDepartment(temp_dept_no);
 
 
             // Manager
@@ -118,7 +118,7 @@ public class App
             if (!mgr_rset.next())
                 { return null; }
 
-            emp.manager = mgr_rset.getString("first_name") + " " + mgr_rset.getString("last_name");
+            emp.manager = getEmployee(mgr_rset.getInt("emp_no"));
 
 
             // Close all result sets
@@ -138,6 +138,34 @@ public class App
 
 
 
+    public Department getDepartment(String dept_no) {
+        try {
+            // Get department details
+            Statement stmt = con.createStatement();
+            String strSelect = "SELECT * FROM departments WHERE dept_no = '" + dept_no + "'";
+            ResultSet dept_rset = stmt.executeQuery(strSelect);
+
+            if (!dept_rset.next()) {
+                throw new RuntimeException("Department number returned no result from database");
+            }
+
+            // Create department object
+            Department dept = new Department(
+                    dept_rset.getString("dept_no"),
+                    dept_rset.getString("dept_name"),
+                    getEmployee(dept_rset.getInt("emp_no"))
+            );
+
+            return dept;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get department details");
+            return null;
+        }
+    }
+
+
+
     public void displayEmployee(Employee emp) {
         if (emp == null) { return; }
         System.out.println(
@@ -145,7 +173,7 @@ public class App
                         + "\n\tName: " + emp.first_name + " " + emp.last_name
                         + "\n\tJob Title: " + emp.title
                         + "\n\tSalary: £" + emp.salary
-                        + "\n\tDepartment: " + emp.dept_name
+                        + "\n\tDepartment: " + emp.department.getName()
                         + "\n\tManager: " + emp.manager
                         + "\n"
         );
@@ -168,12 +196,8 @@ public class App
 
 
     public void displayEmployeeSalariesByDept(Employee dept_manager) {
-        if (dept_manager == null || dept_manager.dept_name == null) {
+        if (dept_manager == null || dept_manager.department == null) {
             System.out.println("Error displaying employee salaries: Department manager does not exist or has no department");
-            return;
-        }
-        if (dept_manager.dept_name.isBlank()) {
-            System.out.println("Error displaying employee salaries: Department manager has no department");
             return;
         }
 
@@ -183,7 +207,7 @@ public class App
 
             ResultSet dept_rset = stmt.executeQuery("SELECT dept_no " +
                     "FROM departments " +
-                    "WHERE dept_name='" + dept_manager.dept_name + "'");
+                    "WHERE dept_name='" + dept_manager.department.getName() + "'");
 
             if (!dept_rset.next()) {
                 throw new RuntimeException("Department name returned no result from database");
