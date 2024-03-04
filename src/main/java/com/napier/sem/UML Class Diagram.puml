@@ -36,7 +36,7 @@ class Department {
     +String getNo()
     +String getName()
     +Employee getManager()
-    +void setNo(int dept_no)
+    +void setNo(String dept_no)
     +void setName(String dept_name)
     +void setManager(Employee manager)
 }
