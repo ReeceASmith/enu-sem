@@ -22,22 +22,25 @@ class App {
     +connect(): void
     +disconnect(): void
     +getEmployee(int ID): Employee
+    +getDepartment(String dept_no): Department
+    +getSalariesByDepartment(Department dept): ArrayList<Employee>
     +displayEmployee(Employee emp): void
     +displayEmployeeSalariesByDept(String dept_no): void
     +displayEmployeeSalariesByDept(Employee dept_manager): void
     +displayEmployeeSalariesByRole(String role): void
     +displayEmployeeSalaries(): void
+    +displayEmployeeSalaries(ArrayList<Employee> employees): void
     -displayEmployeeSalaries(String query): void
     +main(String[] args)
 }
 
 class Department {
-    -dept_no: int
+    -dept_no: String
     -dept_name: String
     -manager: Employee
 
-    +Department(int dept_no, String dept_name, Employee manager)
-    +int getNo()
+    +Department(String dept_no, String dept_name, Employee manager)
+    +String getNo()
     +String getName()
     +Employee getManager()
     +void setNo(int dept_no)
