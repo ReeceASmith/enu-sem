@@ -266,12 +266,14 @@ public class App
 
             // Execute SQL statement
             ResultSet emp_rset = stmt.executeQuery(strSelect);
-
             // Return if no data
             if (!emp_rset.next()) {
                 System.out.println("getEmployeesByDepartment(Department dept): ResultSet returned no results");
                 return employees;
             }
+
+
+            System.out.println("Fetching employees...");
 
 
             // Add each employee to the list
@@ -370,7 +372,7 @@ public class App
 
         System.out.println("\nID\t\tName\t\t\t Salary");
         for (Employee e : employees) {
-            System.out.printf("\n%-8.7s%1.1s. %-12.11s £%d%n", e.emp_no, e.first_name, e.last_name, e.salary);
+            System.out.printf("%-8.7s%1.1s. %-12.11s £%d%n", e.emp_no, e.first_name, e.last_name, e.salary);
         }
     }
 
@@ -426,6 +428,12 @@ public class App
         Employee e = a.getEmployee(111939);
         a.displayEmployee(e);
         a.displayDepartment(e.department);
+
+
+        System.out.println("\n\nSalaries by department: ");
+        ArrayList<Employee> emps = a.getEmployeesByDepartment(e.department);
+        a.displayEmployeeSalaries(emps);
+
 
         // Disconnect from database
         a.disconnect();
