@@ -331,7 +331,7 @@ public class App
 
             String temp_dept_no = dept_rset.getString("dept_no");
             System.out.println("DeptNo: " + temp_dept_no);
-            displayEmployeeSalariesByDept(temp_dept_no);
+            displayEmployeeSalariesByDepartment(temp_dept_no);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get department ID");
@@ -356,7 +356,7 @@ public class App
             }
 
             String temp_dept_no = dept_rset.getString("dept_no");
-            displayEmployeeSalariesByDept(temp_dept_no);
+            displayEmployeeSalariesByDepartment(temp_dept_no);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get department ID");
