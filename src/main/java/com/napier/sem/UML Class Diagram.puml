@@ -1,0 +1,48 @@
+@startuml
+'https://plantuml.com/class-diagram
+class Employee {
+    -emp_no: int
+    -first_name: String
+    -last_name: String
+    -title: String
+    -salary: int
+    -department: Department
+    -manager: Employee
+}
+class App {
+    -con: Connection
+
+    +connect(): void
+    +disconnect(): void
+    +getEmployee(int ID): Employee
+    +getDepartment(String dept_no): Department
+    +getSalariesByDepartment(Department dept): ArrayList<Employee>
+    +displayEmployee(Employee emp): void
+    +displayEmployeeSalariesByDept(String dept_no): void
+    +displayEmployeeSalariesByDept(Employee dept_manager): void
+    +displayEmployeeSalariesByRole(String role): void
+    +displayEmployeeSalaries(): void
+    +displayEmployeeSalaries(ArrayList<Employee> employees): void
+    -displayEmployeeSalaries(String query): void
+    +main(String[] args)
+}
+
+class Department {
+    -dept_no: String
+    -dept_name: String
+    -manager: Employee
+
+    +Department(String dept_no, String dept_name, Employee manager)
+    +String getNo()
+    +String getName()
+    +Employee getManager()
+    +void setNo(String dept_no)
+    +void setName(String dept_name)
+    +void setManager(Employee manager)
+}
+
+App --.> Employee
+Employee " 1 " <--* " 1 " Department
+Employee " 1 " *--> " 1 " Department
+
+@enduml
