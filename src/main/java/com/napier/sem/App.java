@@ -297,7 +297,7 @@ public class App
 
 
 
-    public void displayEmployeeSalariesByDept(String dept_no) {
+    public void displayEmployeeSalariesByDepartment(String dept_no) {
         String strSelect = "";
         if (!dept_no.isBlank()) {
             strSelect = "SELECT employees.emp_no, first_name, last_name, salary " +
@@ -311,7 +311,7 @@ public class App
     }
 
 
-    public void displayEmployeeSalariesByDept(Employee dept_manager) {
+    public void displayEmployeeSalariesByDepartmentManager(Employee dept_manager) {
         if (dept_manager == null || dept_manager.department == null) {
             System.out.println("Error displaying employee salaries: Department manager does not exist or has no department");
             return;
@@ -337,6 +337,32 @@ public class App
             System.out.println("Failed to get department ID");
         }
     }
+
+
+
+    public void displayEmployeeSalariesByDepartmentName(String dept_name) {
+        if (dept_name.isBlank()) {
+            System.out.println("Error displaying employee salaries: No department name provided");
+            return;
+        }
+
+        try {
+            Statement stmt = con.createStatement();
+            String strSelect = "SELECT * FROM departments WHERE dept_name = '" + dept_name + "'";
+
+            ResultSet dept_rset = stmt.executeQuery(strSelect);
+            if (!dept_rset.next()) {
+                throw new RuntimeException("Department name returned no result from database");
+            }
+
+            String temp_dept_no = dept_rset.getString("dept_no");
+            displayEmployeeSalariesByDept(temp_dept_no);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get department ID");
+        }
+    }
+
 
 
     public void displayEmployeeSalariesByRole(String role) {
@@ -430,9 +456,10 @@ public class App
         a.displayDepartment(e.department);
 
 
-        System.out.println("\n\nSalaries by department: ");
-        ArrayList<Employee> emps = a.getEmployeesByDepartment(e.department);
-        a.displayEmployeeSalaries(emps);
+        System.out.println("\n\nSalaries by department name: ");
+        a.displayEmployeeSalariesByDepartmentName("Customer Service");
+        //ArrayList<Employee> emps = a.getEmployeesByDepartment(e.department);
+        //a.displayEmployeeSalaries(emps);
 
 
         // Disconnect from database
