@@ -1,6 +1,7 @@
 package com.napier.sem;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class App
 {
@@ -312,6 +313,20 @@ public class App
                 "FROM employees, salaries " +
                 "WHERE employees.emp_no=salaries.emp_no " +
                 "AND salaries.to_date = '9999-01-01'");
+    }
+
+
+
+    public void displayEmployeeSalaries(ArrayList<Employee> employees) {
+        if (employees.isEmpty()) {
+            System.out.println("No employee salaries to display");
+            return;
+        }
+
+        System.out.println("\nID\t\tName\t\t\t Salary");
+        for (Employee e : employees) {
+            System.out.printf("\n%-8.7s%1.1s. %-12.11s £%d%n", e.emp_no, e.first_name, e.last_name, e.salary);
+        }
     }
 
 
