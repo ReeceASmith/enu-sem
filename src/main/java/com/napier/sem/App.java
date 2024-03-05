@@ -250,6 +250,51 @@ public class App
 
 
 
+    public ArrayList<Employee> getEmployeesByDepartment(Department dept) {
+        ArrayList<Employee> employees = new ArrayList<>();
+
+        if (dept == null) {
+            System.out.println("Error getting employees by department: Department does not exist");
+            return employees;
+        }
+
+
+        try {
+            // Create SQL statement
+            Statement stmt = con.createStatement();
+            String strSelect = "SELECT emp_no FROM dept_emp WHERE dept_no = '" + dept.getNo() + "' AND to_date = '9999-01-01'";
+
+            // Execute SQL statement
+            ResultSet emp_rset = stmt.executeQuery(strSelect);
+
+            // Return if no data
+            if (!emp_rset.next()) {
+                System.out.println("getEmployeesByDepartment(Department dept): ResultSet returned no results");
+                return employees;
+            }
+
+
+            // Add each employee to the list
+            do {
+                Employee emp = getEmployee(emp_rset.getInt("emp_no"));
+                employees.add(emp);
+            } while (emp_rset.next());
+
+
+            // Close result set
+            emp_rset.close();
+
+
+            return employees;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get employees by department");
+            return new ArrayList<>();
+        }
+    }
+
+
+
     public void displayEmployeeSalariesByDept(String dept_no) {
         String strSelect = "";
         if (!dept_no.isBlank()) {
